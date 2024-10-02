@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from core.config import settings
 
-''' Создание асинхроный движок БД'''
+''' Создание асинхронный движок БД'''
 
 
 class DatabaseHelper:
@@ -26,16 +26,17 @@ class DatabaseHelper:
             bind=self.engine,
             autoflush=False,
             autocommit=False,
-            expire_on_commit=False, )
+            expire_on_commit=False)
 
     # Завершение движка БД
     async def dispose(self):
-            await self.engine.dispose() # Очистка асинхронного движка
+        await self.engine.dispose()  # Очистка асинхронного движка
 
-     # Асинхронный получатель сессии
+    # Асинхронный получатель сессии
     async def session_getter(self):
-            async with self.session_factory() as session: # Получение сессии из фабрики
-                yield session
+        async with self.session_factory() as session:  # Получение сессии из фабрики
+            yield session
+
 
 # Создание объекта для работы с БД
 db_helper = DatabaseHelper(
@@ -45,6 +46,3 @@ db_helper = DatabaseHelper(
     max_overflow=settings.db.max_overflow,
     pool_size=settings.db.pool_size,
 )
-
-
-
