@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from pydantic import PostgresDsn
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ''' Класс настройки запуска app'''
 class RunConfig(BaseModel):
@@ -15,16 +15,24 @@ class ApiPrefix(BaseModel):
 ''' Настройки подключение к БД '''
 class DatabaseConfig(BaseModel):
     url: PostgresDsn  # ссылка подключение к БД
-    echo: bool = False,
-    echo_pool: bool = False,
-    max_overflow:int = 50,
+    echo: bool = False
+    echo_pool: bool = False
+    max_overflow: int = 50
     pool_size: int = 10
 
 ''' Файл для всех настроеек приложения  '''
 class Settings(BaseSettings):
+    # настройки модели
+    model_config = SettingsConfigDict(
+        env_file=".env", # путь к файлу с переменными окружения
+        case_sensitive=False, # регистр в именах моделей
+        env_nested_delimiter="__", # разделитель в именах моделей
+        env_prefix="APP_CONFIG__" # префикс для переменных окружения
+    )
     run: RunConfig = RunConfig() # вызов настройки запуска приложения
     api: ApiPrefix = ApiPrefix() # префикс запросов
     db: DatabaseConfig           # настройки подключения к БД
 
 
 settings = Settings()
+
