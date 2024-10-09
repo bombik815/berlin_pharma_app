@@ -7,9 +7,12 @@ class RunConfig(BaseModel):
     host: str = '127.0.0.1' # адрес сервера
     port: int = 8000        # порт сервера
 
+class ApiV1Prefix(BaseModel):
+    prefix: str = '/v1' # префикс запросов для версии API v1
 
 class ApiPrefix(BaseModel):
     prefix: str = '/api' # префикс запросов
+    v1: ApiV1Prefix = ApiV1Prefix() # префикс запросов для версии API v1
 
 
 ''' Настройки подключение к БД '''
