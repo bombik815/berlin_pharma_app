@@ -3,8 +3,8 @@ from sqlalchemy.orm import declared_attr
 
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from core.config import settings
 from utils import camel_case_to_snake_case
+
 
 # Базовая модель для всех моделей
 class Base(DeclarativeBase):
