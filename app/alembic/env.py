@@ -11,8 +11,6 @@ from core.models import Base
 from core.config import settings
 
 
-from core.models import RegistrationCertificate
-
 config = context.config
 # Добавим данную строку
 config.set_main_option("sqlalchemy.url", str(settings.db.url))
