@@ -54,15 +54,55 @@ class RegistrationCertificateDAO(BaseDAO):
     # async def update_registration_certificate(
     #     cls,
     #     session: AsyncSession,
-    #     certificate_id: UUID,
+    #     certificate_update: (
+    #         SRegistrationCertificateUpdate | SRegistrationCertificatePartial
+    #     ),
     #     certificate_data: RegistrationCertificate,
-    # ) -> Optional[SRegistrationCertificateUpdate]:
+    #     partial: bool = False,
+    # ) -> RegistrationCertificate:
     #
-    #     stmt = (
-    #         update(RegistrationCertificate)
-    #         .filter_by(id=certificate_id)
-    #         .values(**certificate_data.dict())
-    #     )
-    #     await session.execute(stmt)
-    #     await session.commit()
-    #     return await cls.get_registration_certificate_by_id(certificate_id)
+    #     try:
+    #         for name, value in certificate_update.model_dump(
+    #             exclude_unset=partial
+    #         ).items():
+    #             setattr(
+    #                 certificate_update, name, value
+    #             )  # Обновляем атрибуты объекта certificate
+    #             print(f"Обновлено поле {name=} значение {value=}")
+    #
+    #         await session.commit()
+    #         await session.refresh(certificate_data)  # Обновляем состояние объекта в БД
+    #         print("Сохранено в БД данные")
+    #
+    #     except Exception as e:
+    #         print(f"Ошибка обновления сертификата: {e}")
+    #         await session.rollback()
+    #     finally:
+    #         await session.close()
+    #     return certificate_data
+
+    @classmethod
+    async def update_registration_certificate(
+        cls,
+        session: AsyncSession,
+        certificate_id: UUID,
+        certificate_update: SRegistrationCertificateUpdate,
+    ) -> RegistrationCertificate:
+
+        # Получаем существующий сертификат
+        query = select(cls.model).filter_by(id=certificate_id)
+        result = await session.execute(query)
+        certificate_data = result.scalar_one_or_none()
+
+        if not certificate_data:
+            raise Exception(f"Сертификат с ID {certificate_id} не найден")
+
+        # Обновляем поля
+        for name, value in certificate_update.dict(exclude_unset=True).items():
+            setattr(certificate_data, name, value)
+
+        await session.commit()
+        await session.refresh(
+            certificate_data
+        )  # Обновляем объект для получения актуального состояния из БД
+        return certificate_data

@@ -13,11 +13,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.models import db_helper
 
 from .dao import RegistrationCertificateDAO as certificateDAO
+from .dependencies import registration_certificate_by_id
 
 from .schemas import (
     SRegistrationCertificate,
     SRegistrationCertificateUpdate,
     SRegistrationCertificateCreate,
+    SRegistrationCertificateBase,
 )
 
 router = APIRouter(tags=["Регистрационные удостоверения"])
@@ -65,17 +67,43 @@ async def get_registration_certificate_by_id(
         )
 
 
-# @router.put("/{certificate_id}/", summary="Обновить Регистрационное удостоверение")
+# @router.put(
+#     "/{certificate_id}/",
+#     status_code=status.HTTP_200_OK,
+#     summary="Обновить Регистрационное удостоверение",
+# )
 # async def update_registration_certificate(
 #     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 #     certificate_update: SRegistrationCertificateUpdate,
-#     certificate: SRegistrationCertificate = Depends(
-#         certificateDAO.get_registration_certificate_by_id
+#     certificate_data: SRegistrationCertificate = Depends(
+#         registration_certificate_by_id
 #     ),
 # ):
 #     result = await certificateDAO.update_registration_certificate(
 #         session=session,
-#         certificate=certificate,
 #         certificate_update=certificate_update,
+#         certificate_data=certificate_data,
 #     )
 #     return result
+@router.put(
+    "/{certificate_id}/",
+    response_model=SRegistrationCertificate,
+    status_code=status.HTTP_200_OK,
+    summary="Обновить Регистрационное удостоверение",
+)
+async def update_registration_certificate(
+    certificate_id: UUID,
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    certificate_update: SRegistrationCertificateBase,
+):
+    # Обновление сертификата в базе данных
+    try:
+        result = await certificateDAO.update_registration_certificate(
+            session=session,
+            certificate_id=certificate_id,
+            certificate_update=certificate_update,
+        )
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
