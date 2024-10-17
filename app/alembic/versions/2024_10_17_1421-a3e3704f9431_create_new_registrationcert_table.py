@@ -1,8 +1,8 @@
 """create new RegistrationCert Table
 
-Revision ID: fdc3f599e0fb
+Revision ID: a3e3704f9431
 Revises: 
-Create Date: 2024-10-15 14:29:30.676409
+Create Date: 2024-10-17 14:21:47.372115
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "fdc3f599e0fb"
+revision: str = "a3e3704f9431"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column("trade_Name", sa.String(), nullable=False),
         sa.Column("reg_Cert_Number", sa.String(), nullable=False),
         sa.Column("createAt_Reg_Cer", sa.DateTime(), nullable=False),
-        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("id", sa.UUID(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("reg_Cert_Number"),
     )
