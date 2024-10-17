@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import Path, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.models import db_helper
 from core.models import RegistrationCertificate
 
-from . import crud
+from .dao import RegistrationCertificateDAO as crud
 
 
 """
@@ -25,7 +26,7 @@ Raises:
 
 
 async def registration_certificate_by_id(
-    certificate_id: Annotated[int, Path],
+    certificate_id: Annotated[UUID, Path],
     session: AsyncSession = Depends(db_helper.session_getter),
 ) -> RegistrationCertificate:
 
