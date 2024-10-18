@@ -20,6 +20,7 @@ from .schemas import (
     SRegistrationCertificateUpdate,
     SRegistrationCertificateCreate,
     SRegistrationCertificateBase,
+    SRegistrationCertificatePartial,
 )
 
 router = APIRouter(tags=["Регистрационные удостоверения"])
@@ -33,7 +34,7 @@ async def get_registration_certificates(
 
 
 @router.post(
-    "/add/",
+    "/",
     response_model=SRegistrationCertificate,
     status_code=status.HTTP_201_CREATED,
     summary="Создать Регистрационное удостоверение",
@@ -67,23 +68,6 @@ async def get_registration_certificate_by_id(
         )
 
 
-# @router.put(
-#     "/{certificate_id}/",
-#     status_code=status.HTTP_200_OK,
-#     summary="Обновить Регистрационное удостоверение",
-# )
-# async def update_registration_certificate(
-#     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-#     certificate_update: SRegistrationCertificateUpdate,
-#     certificate_data: SRegistrationCertificate = Depends(
-#         registration_certificate_by_id
-#     ),
-# ):
-#     result = await certificateDAO.update_registration_certificate(
-#         session=session,
-#         certificate_update=certificate_update,
-#         certificate_data=certificate_data,
-#     )
 #     return result
 @router.put(
     "/{certificate_id}/",
@@ -105,5 +89,41 @@ async def update_registration_certificate(
         )
         return result
 
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# @router.patch(
+#     "/{certificate_id}/",
+#     summary="Частичное обновление Регистрационного удостоверения",
+# )
+# async def update_registration_certificate_partial(
+#     certificate_update: SRegistrationCertificatePartial,
+#     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+#     certificate: SRegistrationCertificate = Depends(registration_certificate_by_id),
+# ):
+#     # Обновление сертификата в базе данных
+#     return await certificateDAO.update_registration_certificate_new(
+#         session=session,
+#         certificate=certificate,
+#         certificate_update=certificate_update,
+#         partial=True,
+#     )
+
+
+@router.delete(
+    "/{certificate_id}/",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Удалить Регистрационное удостоверение",
+)
+async def delete_registration_certificate(
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    certificate: SRegistrationCertificate = Depends(registration_certificate_by_id),
+):
+    # Удаление сертификата из базы данных
+    try:
+        await certificateDAO.delete_registration_certificate(
+            session=session, certificate=certificate
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
