@@ -12,6 +12,13 @@ from api import router as api_router
 
 from core.models import db_helper
 
+from app.admin.views import (
+    RegistrationCertificateAdmin,
+)
+from sqladmin import Admin
+
+from core.models.db_helper import DatabaseHelper
+
 
 @asynccontextmanager
 async def lifespan(app):
@@ -52,6 +59,13 @@ main_app.add_middleware(
         "Authorization",
     ],
 )
+
+# Подключение админки
+admin = Admin(
+    main_app,
+    engine=db_helper.engine,
+)
+admin.add_view(RegistrationCertificateAdmin)
 
 
 if __name__ == "__main__":
