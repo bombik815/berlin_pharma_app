@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional, Dict, List
 from uuid import UUID
 
 from fastapi import (
@@ -21,16 +21,43 @@ from .schemas import (
     SRegistrationCertificateCreate,
     SRegistrationCertificateBase,
     SRegistrationCertificatePartial,
+    RegistrationCertificatesResponse,
 )
 
 router = APIRouter(tags=["Регистрационные удостоверения"])
 
 
-@router.get("/", summary="Получить все Регистрационные удостоверения")
+@router.get(
+    "/",
+    summary="Получить все Регистрационные удостоверения",
+    response_model=RegistrationCertificatesResponse,
+)
 async def get_registration_certificates(
-    session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    is_active: Optional[bool] = None,
+    limit: int = 10,
+    skip: int = 0,
 ):
-    return await certificateDAO.get_all_registration_certificates(session=session)
+    total, certificates = await certificateDAO.get_all_registration_certificates(
+        session=session, is_active=is_active, skip=skip, limit=limit
+    )
+    page = (skip // limit) + 1  # Определяем текущую страницу
+    size = len(certificates)  # Кол-во записей на текущей странице
+
+    if not certificates:
+        # Если не найдено сертификатов и is_active определено, возвращаем 404
+        if is_active is not None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No certificates found matching the active status.",
+            )
+
+    return RegistrationCertificatesResponse(
+        total=total,
+        page=page,
+        size=size,
+        data=certificates,
+    )
 
 
 @router.post(
@@ -68,7 +95,6 @@ async def get_registration_certificate_by_id(
         )
 
 
-#     return result
 @router.put(
     "/{certificate_id}/",
     response_model=SRegistrationCertificate,
@@ -93,24 +119,6 @@ async def update_registration_certificate(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# @router.patch(
-#     "/{certificate_id}/",
-#     summary="Частичное обновление Регистрационного удостоверения",
-# )
-# async def update_registration_certificate_partial(
-#     certificate_update: SRegistrationCertificatePartial,
-#     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-#     certificate: SRegistrationCertificate = Depends(registration_certificate_by_id),
-# ):
-#     # Обновление сертификата в базе данных
-#     return await certificateDAO.update_registration_certificate_new(
-#         session=session,
-#         certificate=certificate,
-#         certificate_update=certificate_update,
-#         partial=True,
-#     )
-
-
 @router.delete(
     "/{certificate_id}/",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -120,6 +128,11 @@ async def delete_registration_certificate(
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     certificate: SRegistrationCertificate = Depends(registration_certificate_by_id),
 ):
+    if certificate is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="There is no certificate found",
+        )
     # Удаление сертификата из базы данных
     try:
         await certificateDAO.delete_registration_certificate(

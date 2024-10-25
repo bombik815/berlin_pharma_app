@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -11,6 +11,7 @@ class SRegistrationCertificateBase(BaseModel):
     createAt_Reg_Cer: datetime = Field(
         ..., alias="createAt_Reg_Cer"
     )  # Используем 'alias' только если необходимо
+    is_Active: bool = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -36,3 +37,12 @@ class SRegistrationCertificate(SRegistrationCertificateBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
+
+
+class RegistrationCertificatesResponse(BaseModel):
+    total: int
+    page: int
+    size: int
+    data: List[SRegistrationCertificate]
+
+    model_config = ConfigDict(from_attributes=True)

@@ -1,10 +1,7 @@
-from datetime import datetime
-from typing import Sequence, Optional
 from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func
 
 from api.api_v1.registration_certificate.schemas import (
     SRegistrationCertificateCreate,
@@ -21,13 +18,29 @@ class RegistrationCertificateDAO(BaseDAO):
     model = RegistrationCertificate
 
     @classmethod
-    async def get_all_registration_certificates(cls, session: AsyncSession):
-        # Создаем запрос для получения всех сертификатов
-        query = select(cls.model).order_by(cls.model.id)
-        # Выполняем запрос и получаем результаты
-        result = await session.execute(query)
-        # извлекаем записи как объекты модели и возвращаем их
-        return result.scalars().all()
+    async def get_all_registration_certificates(
+        cls,
+        session: AsyncSession,
+        is_active: bool = None,
+        limit: int = 10,
+        skip: int = 0,
+    ):
+        query = select(cls.model)
+
+        if is_active is not None:
+            query = query.filter(cls.model.is_Active == is_active)
+
+        total_query = select(func.count()).select_from(
+            cls.model
+        )  # Counting total records
+        total = await session.execute(total_query)
+        total_count = total.scalar()  # Get the count from the result
+
+        result = await session.execute(query.offset(skip).limit(limit))
+        certificates = result.scalars().all()  # Fetch the actual records
+
+        return total_count, certificates
+
 
     @classmethod
     async def get_registration_certificate_by_id(
@@ -49,29 +62,6 @@ class RegistrationCertificateDAO(BaseDAO):
         await session.commit()
         await session.refresh(new_certificate)
         return new_certificate
-
-    # @classmethod
-    # async def update_registration_certificate_new(
-    #     cls,
-    #     session: AsyncSession,
-    #     certificate_update: (
-    #         SRegistrationCertificateUpdate | SRegistrationCertificatePartial
-    #     ),
-    #     certificate: RegistrationCertificate,
-    #     partial: bool = False,
-    # ) -> RegistrationCertificate:
-    #
-    #     for name, value in certificate_update.dict(exclude_unset=partial).items():
-    #         setattr(
-    #             certificate_update, name, value
-    #         )  # Обновляем атрибуты объекта certificate
-    #         print(f"Обновлено поле {name=} значение {value=}")
-    #
-    #     await session.commit()
-    #     # await session.refresh(certificate)  # Обновляем состояние объекта в БД
-    #     print("Сохранено в БД данные")
-    #
-    #     return certificate
 
     @classmethod
     async def update_registration_certificate(
@@ -99,40 +89,12 @@ class RegistrationCertificateDAO(BaseDAO):
         )  # Обновляем объект для получения актуального состояния из БД
         return certificate_data
 
-    # @classmethod
-    # async def update_registration_certificate_partial(
-    #     cls,
-    #     session: AsyncSession,
-    #     certificate_id: UUID,
-    #     certificate_update: SRegistrationCertificatePartial,
-    # ) -> RegistrationCertificate:
-    #
-    #     # Получаем существующий сертификат
-    #     query = select(cls.model).filter_by(id=certificate_id)
-    #     result = await session.execute(query)
-    #     certificate = result.scalar_one_or_none()
-    #
-    #     if not certificate:
-    #         raise Exception(f"Сертификат с ID {certificate_id} не найден")
-    #
-    #     # Обновить только те поля, которые указаны
-    #     if certificate_update.trade_Name is not None:
-    #         certificate.trade_name = certificate_update.trade_Name
-    #
-    #     if certificate_update.reg_Cert_Number is not None:
-    #         certificate.reg_cert_number = certificate_update.reg_Cert_Number
-    #
-    #     if certificate_update.createAt_Reg_Cer is not None:
-    #         certificate.create_at_reg_cer = certificate_update.createAt_Reg_Cer
-    #
-    #     # Сохранить изменения
-    #     await session.commit()
-    #
-    #     return certificate
-
     @classmethod
     async def delete_registration_certificate(
-        cls, session: AsyncSession, certificate: SRegistrationCertificate
-    ) -> None:
-        await session.delete(certificate)
+        cls, session: AsyncSession, certificate: RegistrationCertificate
+    ):
+        certificate.is_Active = False
+        # await session.delete(certificate)
         await session.commit()
+        await session.refresh(certificate)
+        return certificate
