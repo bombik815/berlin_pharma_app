@@ -41,8 +41,8 @@ class SRegistrationCertificate(SRegistrationCertificateBase):
 
 class RegistrationCertificatesResponse(BaseModel):
     total: int
-    page: int
-    size: int
+    # page: int
+    # size: int
     data: List[SRegistrationCertificate]
 
     model_config = ConfigDict(from_attributes=True)

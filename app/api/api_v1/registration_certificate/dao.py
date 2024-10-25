@@ -1,14 +1,11 @@
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import select, func
 
 from api.api_v1.registration_certificate.schemas import (
     SRegistrationCertificateCreate,
     SRegistrationCertificateUpdate,
-    SRegistrationCertificatePartial,
-    SRegistrationCertificate,
-    SRegistrationCertificateBase,
 )
 from core.dao.base import BaseDAO
 from core.models import RegistrationCertificate
@@ -26,21 +23,17 @@ class RegistrationCertificateDAO(BaseDAO):
         skip: int = 0,
     ):
         query = select(cls.model)
-
         if is_active is not None:
             query = query.filter(cls.model.is_Active == is_active)
 
         total_query = select(func.count()).select_from(
             cls.model
-        )  # Counting total records
+        )  # Подсчет общего количества записей
         total = await session.execute(total_query)
-        total_count = total.scalar()  # Get the count from the result
-
+        total_count = total.scalar()  # Получите количество записей из результата
         result = await session.execute(query.offset(skip).limit(limit))
-        certificates = result.scalars().all()  # Fetch the actual records
-
+        certificates = result.scalars().all()  # Получить фактические записи
         return total_count, certificates
-
 
     @classmethod
     async def get_registration_certificate_by_id(
@@ -94,7 +87,6 @@ class RegistrationCertificateDAO(BaseDAO):
         cls, session: AsyncSession, certificate: RegistrationCertificate
     ):
         certificate.is_Active = False
-        # await session.delete(certificate)
         await session.commit()
         await session.refresh(certificate)
         return certificate

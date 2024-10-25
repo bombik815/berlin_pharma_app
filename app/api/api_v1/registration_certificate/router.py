@@ -54,8 +54,8 @@ async def get_registration_certificates(
 
     return RegistrationCertificatesResponse(
         total=total,
-        page=page,
-        size=size,
+        # page=page,
+        # size=size,
         data=certificates,
     )
 
