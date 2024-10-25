@@ -17,8 +17,6 @@ from app.admin.views import (
 )
 from sqladmin import Admin
 
-from core.models.db_helper import DatabaseHelper
-
 
 @asynccontextmanager
 async def lifespan(app):
