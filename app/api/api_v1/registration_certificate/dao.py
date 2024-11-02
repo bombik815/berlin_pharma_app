@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -70,7 +71,10 @@ class RegistrationCertificateDAO(BaseDAO):
         certificate_data = result.scalar_one_or_none()
 
         if not certificate_data:
-            raise Exception(f"Сертификат с ID {certificate_id} не найден")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Сертификат с ID {certificate_id} не найден",
+            )
 
         # Обновляем поля
         for name, value in certificate_update.dict(exclude_unset=True).items():

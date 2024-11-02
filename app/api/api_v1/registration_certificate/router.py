@@ -1,4 +1,4 @@
-from typing import Annotated, Optional, Dict, List
+from typing import Annotated, Optional
 from uuid import UUID
 
 from fastapi import (
@@ -9,7 +9,6 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 from core.models import db_helper
 
 from .dao import RegistrationCertificateDAO as certificateDAO
@@ -17,10 +16,8 @@ from .dependencies import registration_certificate_by_id
 
 from .schemas import (
     SRegistrationCertificate,
-    SRegistrationCertificateUpdate,
     SRegistrationCertificateCreate,
     SRegistrationCertificateBase,
-    SRegistrationCertificatePartial,
     RegistrationCertificatesResponse,
 )
 
@@ -54,8 +51,6 @@ async def get_registration_certificates(
 
     return RegistrationCertificatesResponse(
         total=total,
-        # page=page,
-        # size=size,
         data=certificates,
     )
 
