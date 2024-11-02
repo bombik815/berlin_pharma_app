@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import String, DateTime, Boolean
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
 from .base import Base
 
@@ -13,5 +13,9 @@ class RegistrationCertificate(Base):
     createAt_Reg_Cer: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_Active: Mapped[bool] = mapped_column(Boolean, default=True)
 
+    release_forms = relationship(
+        "ReleaseForm", back_populates="registration_certificate"
+    )
+
     def __repr__(self) -> str:
-        return f'<RegistrationCertificate(trade_Name="{self.trade_Name}", reg_Cert_Number="{self.reg_Cert_Number}")>'
+        return f"{self.trade_Name}, {self.reg_Cert_Number}, {self.is_Active}"
