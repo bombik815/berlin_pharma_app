@@ -13,7 +13,8 @@ from api import router as api_router
 from core.models import db_helper
 
 from app.admin.views import (
-    RegistrationCertificateAdmin,
+    Registration_Certificate_Admin,
+    Release_Form_Admin,
 )
 from sqladmin import Admin
 
@@ -63,7 +64,8 @@ admin = Admin(
     main_app,
     engine=db_helper.engine,
 )
-admin.add_view(RegistrationCertificateAdmin)
+admin.add_view(Registration_Certificate_Admin)
+admin.add_view(Release_Form_Admin)
 
 
 if __name__ == "__main__":
