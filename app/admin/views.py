@@ -73,7 +73,6 @@ class Release_Form_Admin(ModelView, model=ReleaseForm):
         ReleaseForm.count_primary_packaging: "Кол-во первичной уп в потребительской уп",
         ReleaseForm.id_drug_name: "Наименование препарата",
         ReleaseForm.gtin: "GTIN",
-        ReleaseForm.is_active: "Активен",
         ReleaseForm.registration_certificate_id: "ID РУ",
     }
     save_as = True
@@ -83,7 +82,6 @@ class Release_Form_Admin(ModelView, model=ReleaseForm):
         ReleaseForm.count_primary_packaging,
         ReleaseForm.id_drug_name,
         ReleaseForm.gtin,
-        ReleaseForm.is_active,
         ReleaseForm.registration_certificate_id,
     ]
 
