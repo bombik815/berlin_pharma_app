@@ -13,6 +13,7 @@ class RunConfig(BaseModel):
 class ApiV1Prefix(BaseModel):
     prefix: str = "/v1"  # префикс запросов для версии API v1
     registration_certificates: str = "/registration_certificates"
+    release_form: str = "/release_form"
 
 
 class ApiPrefix(BaseModel):
